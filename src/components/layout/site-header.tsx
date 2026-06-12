@@ -32,7 +32,11 @@ export function SiteHeader() {
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
+    document.body.classList.toggle('nav-open', open)
+    return () => {
+      document.body.style.overflow = ''
+      document.body.classList.remove('nav-open')
+    }
   }, [open])
 
   return (
@@ -181,7 +185,7 @@ export function SiteHeader() {
         .nav-sheet {
           position: fixed; inset: 0; z-index: 50;
           background: var(--ivory);
-          padding: 100px clamp(22px, 6vw, 40px) 36px;
+          padding: 100px clamp(22px, 6vw, 40px) 48px;
           display: flex; flex-direction: column; justify-content: space-between;
           opacity: 0; visibility: hidden; transform: translateY(-12px);
           transition: opacity 0.4s var(--ease), transform 0.4s var(--ease), visibility 0.4s;

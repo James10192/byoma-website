@@ -186,14 +186,51 @@ function SelectField({
   )
 }
 
-/** CTA de réservation collant (mobile) : apparaît une fois le hero dépassé. */
+/** CTA de réservation collant (mobile) : apparaît une fois le hero dépassé,
+ *  et se masque près du bas de page pour ne pas couvrir la section contact / footer. */
 export function StickyBookingCTA() {
   const [show, setShow] = useState(false)
   useEffect(() => {
-    const onScroll = () => setShow(window.scrollY > window.innerHeight * 0.85)
+    // Vrai dès qu'une zone basse (#reserver ou footer) entre dans le viewport.
+    let bottomVisible = false
+
+    const onScroll = () => {
+      const pastHero = window.scrollY > window.innerHeight * 0.85
+      const nearBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight - 160
+      setShow(pastHero && !nearBottom && !bottomVisible)
+    }
+
+    const targets: Element[] = []
+    const reserver = document.getElementById('reserver')
+    const footer = document.querySelector('footer.byoma-footer') || document.querySelector('footer')
+    if (reserver) targets.push(reserver)
+    if (footer) targets.push(footer)
+
+    let observer: IntersectionObserver | null = null
+    if (targets.length > 0 && typeof IntersectionObserver !== 'undefined') {
+      const visible = new Set<Element>()
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) visible.add(e.target)
+            else visible.delete(e.target)
+          }
+          bottomVisible = visible.size > 0
+          onScroll()
+        },
+        { rootMargin: '0px 0px -10% 0px' },
+      )
+      for (const t of targets) observer.observe(t)
+    }
+
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    window.addEventListener('resize', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      observer?.disconnect()
+    }
   }, [])
 
   return (
@@ -215,6 +252,8 @@ export function StickyBookingCTA() {
           transition: transform 0.4s var(--ease), opacity 0.3s ease;
         }
         .sticky-cta.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+        /* Menu mobile ouvert : on masque le CTA collant pour ne pas couvrir le bouton du menu. */
+        body.nav-open .sticky-cta { opacity: 0 !important; pointer-events: none !important; transform: translateY(140%) !important; }
         .sticky-cta-info { display: flex; flex-direction: column; line-height: 1.1; }
         .sticky-cta-label { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(251,247,238,0.6); }
         .sticky-cta-price { font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; color: var(--gold-soft); margin-top: 2px; }
