@@ -38,10 +38,10 @@ function HomePage() {
           <div className="hero-copy">
             <img src="/logo-byoma.png" alt="Les Résidences BYOMA" width={92} height={92} className="hero-logo fade-up" />
             <span className="kicker kicker--light fade-up">Résidences meublées · Abidjan</span>
-            <h1 className="display fade-up-delay-1" style={{ fontSize: 'clamp(2.7rem, 6vw, 5.4rem)', color: 'var(--ivory)', marginTop: 22, maxWidth: '12ch' }}>
+            <h1 className="display fade-up-delay-1" style={{ fontSize: 'clamp(2rem, 7vw, 5.4rem)', color: 'var(--ivory)', marginTop: 22, maxWidth: '12ch' }}>
               L'art de <em>séjourner</em> à Cocody
             </h1>
-            <p className="fade-up-delay-2" style={{ marginTop: 24, fontSize: 'clamp(1rem, 1.5vw, 1.18rem)', color: 'rgba(245,239,227,0.82)', lineHeight: 1.7, maxWidth: 460 }}>
+            <p className="fade-up-delay-2" style={{ marginTop: 20, fontSize: 'clamp(0.92rem, 2.6vw, 1.18rem)', color: 'rgba(245,239,227,0.82)', lineHeight: 1.65, maxWidth: 460 }}>
               Studios et appartements meublés haut de gamme, pensés pour le calme, le confort et la discrétion. Réservez en ligne, en temps réel.
             </p>
             <div className="fade-up-delay-3" style={{ marginTop: 36, display: 'flex', flexWrap: 'wrap', gap: 14 }}>
@@ -56,7 +56,7 @@ function HomePage() {
                 { v: '25K', l: 'FCFA / nuit, dès' },
               ].map((s) => (
                 <div key={s.l}>
-                  <div className="font-display" style={{ fontSize: '1.9rem', fontWeight: 500, color: 'var(--gold-soft)', lineHeight: 1 }}>{s.v}</div>
+                  <div className="font-display" style={{ fontSize: 'clamp(1.45rem, 6vw, 1.9rem)', fontWeight: 500, color: 'var(--gold-soft)', lineHeight: 1 }}>{s.v}</div>
                   <div style={{ fontSize: '0.68rem', color: 'rgba(245,239,227,0.55)', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 6 }}>{s.l}</div>
                 </div>
               ))}
@@ -90,7 +90,7 @@ function HomePage() {
               <span className="kicker">L'esprit BYOMA</span>
               <div className="rule" style={{ marginTop: 18, marginBottom: 30, maxWidth: 120 }} />
             </div>
-            <p className="display" style={{ fontSize: 'clamp(1.6rem, 3.4vw, 2.7rem)', color: 'var(--noir)', lineHeight: 1.18 }}>
+            <p className="display" style={{ fontSize: 'clamp(1.35rem, 4.4vw, 2.7rem)', color: 'var(--noir)', lineHeight: 1.2 }}>
               Chaque résidence est meublée, équipée et entretenue pour que vous vous sentiez <em>chez vous</em> dès le seuil franchi. Le luxe, ici, c'est le soin du détail.
             </p>
           </Reveal>
@@ -101,7 +101,7 @@ function HomePage() {
       <section className="cinema-band" aria-hidden>
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(21,18,11,0.4), rgba(21,18,11,0.55))' }} />
         <Parallax speed={8} style={{ position: 'relative', maxWidth: 880, padding: '0 24px', textAlign: 'center' }}>
-          <p className="display" style={{ fontSize: 'clamp(1.7rem, 4vw, 3.2rem)', color: 'var(--ivory)', lineHeight: 1.18 }}>
+          <p className="display" style={{ fontSize: 'clamp(1.4rem, 5vw, 3.2rem)', color: 'var(--ivory)', lineHeight: 1.2 }}>
             « Un séjour, <em style={{ color: 'var(--gold-soft)' }}>une parenthèse</em>. »
           </p>
         </Parallax>

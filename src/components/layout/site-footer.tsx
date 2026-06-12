@@ -15,7 +15,7 @@ export function SiteFooter() {
         {/* Grande accroche éditoriale */}
         <Reveal as="div" style={{ maxWidth: 720, marginBottom: 'clamp(48px, 7vw, 80px)' }} start="top 90%">
           <span className="kicker kicker--light">Réservez votre séjour</span>
-          <p className="display" style={{ fontSize: 'clamp(2rem, 5vw, 3.4rem)', color: 'var(--ivory)', marginTop: 18 }}>
+          <p className="display" style={{ fontSize: 'clamp(1.6rem, 6vw, 3.4rem)', color: 'var(--ivory)', marginTop: 16 }}>
             Une adresse <em>confidentielle</em>, au cœur de Cocody.
           </p>
         </Reveal>
