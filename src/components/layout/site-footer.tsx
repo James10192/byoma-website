@@ -77,10 +77,14 @@ export function SiteFooter() {
       </div>
 
       <style>{`
-        .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1.2fr; gap: clamp(32px, 5vw, 72px); }
+        /* Base = mobile-first : 1 colonne empilee */
+        .footer-grid { display: grid; grid-template-columns: 1fr; gap: 40px; }
         .footer-link { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: rgba(245,239,227,0.7); font-size: 0.9rem; transition: color 0.25s ease; }
         .footer-link:hover { color: var(--gold-soft); }
-        @media (max-width: 760px) { .footer-grid { grid-template-columns: 1fr; gap: 40px; } }
+        /* >= tablette : 2 colonnes */
+        @media (min-width: 620px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px 48px; } }
+        /* >= desktop : 3 colonnes (version desktop d'origine) */
+        @media (min-width: 880px) { .footer-grid { grid-template-columns: 1.4fr 1fr 1.2fr; gap: clamp(32px, 5vw, 72px); } }
       `}</style>
     </footer>
   )

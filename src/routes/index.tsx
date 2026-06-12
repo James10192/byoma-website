@@ -194,12 +194,12 @@ function HomePage() {
       </section>
 
       <style>{`
-        .hero { position: relative; background: var(--noir); overflow: hidden; padding: clamp(124px,15vw,180px) clamp(24px,5vw,68px) clamp(64px,9vw,108px); }
-        .hero-logo { height: 92px; width: auto; display: block; background: var(--ivory); border-radius: 14px; padding: 8px; margin-bottom: 26px; box-shadow: 0 16px 40px -20px rgba(0,0,0,0.6); }
-        @media (max-width: 880px) { .hero-logo { height: 76px; } }
+        /* ---- Base = mobile-first ; on monte ensuite en min-width ---- */
+        .hero { position: relative; background: var(--noir); overflow: hidden; padding: clamp(100px,22vw,168px) clamp(20px,5vw,68px) clamp(56px,9vw,108px); }
+        .hero-logo { height: 72px; width: auto; display: block; background: var(--ivory); border-radius: 14px; padding: 8px; margin-bottom: 20px; box-shadow: 0 16px 40px -20px rgba(0,0,0,0.6); }
         .hero-glow { position: absolute; top: -25%; right: -12%; width: 62%; height: 95%; background: radial-gradient(circle, rgba(201,168,76,0.16), transparent 64%); pointer-events: none; }
-        .hero-grid { position: relative; max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 1.05fr 0.92fr; gap: clamp(36px,5vw,84px); align-items: center; }
-        .hero-media { position: relative; }
+        .hero-grid { position: relative; max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: clamp(40px,8vw,56px); align-items: center; }
+        .hero-media { position: relative; max-width: 460px; }
         .hero-frame { position: relative; aspect-ratio: 4 / 5; overflow: hidden; border: 1px solid rgba(224,201,136,0.32); }
         .hero-frame-accent { position: absolute; inset: 0; transform: translate(16px, 16px); border: 1px solid rgba(224,201,136,0.32); pointer-events: none; }
         .hero-slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; animation: heroSlide 20s infinite; }
@@ -212,33 +212,36 @@ function HomePage() {
           100% { opacity: 0; }
         }
         .hero-frame-tag { position: absolute; left: 14px; bottom: 14px; z-index: 3; padding: 7px 13px; background: rgba(21,18,11,0.62); backdrop-filter: blur(5px); color: var(--gold-soft); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
-        .hero-stats { display: flex; gap: clamp(24px,4vw,48px); flex-wrap: wrap; }
+        .hero-stats { display: flex; gap: clamp(20px,5vw,48px); flex-wrap: wrap; }
         .hero-stats > div { padding-top: 20px; border-top: 1px solid rgba(224,201,136,0.22); }
         @media (prefers-reduced-motion: reduce) {
           .hero-slide { animation: none; opacity: 0; }
           .hero-slide:first-child { opacity: 1; }
         }
-        .manifeste-grid { display: grid; grid-template-columns: 0.5fr 1.5fr; gap: clamp(28px,5vw,64px); align-items: start; }
-        .cinema-band { position: relative; min-height: clamp(360px, 52vh, 560px); display: flex; align-items: center; justify-content: center; background-image: url('/images/45k/3.jpg'); background-size: cover; background-position: center; background-attachment: fixed; }
-        .studios-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px,2vw,28px); }
-        .atouts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line-dark); border: 1px solid var(--line-dark); }
-        .atout { background: var(--noir); padding: 30px 26px; }
-        .loc-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(32px,5vw,72px); align-items: center; }
+        .manifeste-grid { display: grid; grid-template-columns: 1fr; gap: clamp(24px,5vw,64px); align-items: start; }
+        .cinema-band { position: relative; min-height: clamp(320px, 52vh, 560px); display: flex; align-items: center; justify-content: center; background-image: url('/images/45k/3.jpg'); background-size: cover; background-position: center; background-attachment: scroll; }
+        .studios-grid { display: grid; grid-template-columns: 1fr; gap: clamp(16px,4vw,28px); }
+        .atouts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line-dark); border: 1px solid var(--line-dark); }
+        .atout { background: var(--noir); padding: 26px 22px; }
+        .loc-grid { display: grid; grid-template-columns: 1fr; gap: clamp(28px,6vw,72px); align-items: center; }
         .see-all { display: inline-flex; align-items: center; gap: 8px; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-deep); padding-bottom: 4px; border-bottom: 1px solid var(--gold-deep); white-space: nowrap; }
         .contact-pill { display: inline-flex; align-items: center; gap: 10px; padding: 14px 24px; border: 1px solid var(--line-dark); color: var(--ivory); font-size: 0.92rem; transition: border-color 0.3s ease, background 0.3s ease; }
         .contact-pill:hover { border-color: var(--gold); background: rgba(201,168,76,0.08); }
-        @media (max-width: 980px) {
-          .hero-grid { grid-template-columns: 1fr; gap: clamp(40px,8vw,56px); }
-          .hero-media { max-width: 460px; }
-          .manifeste-grid { grid-template-columns: 1fr; }
+        /* >= tablette : la grille des residences passe a 2 colonnes */
+        @media (min-width: 601px) {
           .studios-grid { grid-template-columns: repeat(2, 1fr); }
-          .atouts-grid { grid-template-columns: repeat(2, 1fr); }
-          .loc-grid { grid-template-columns: 1fr; }
-          .cinema-band { background-attachment: scroll; }
         }
-        @media (max-width: 600px) {
-          .studios-grid { grid-template-columns: 1fr; }
-          .atouts-grid { grid-template-columns: 1fr 1fr; }
+        /* >= desktop : layouts multi-colonnes complets + parallaxe fond fixe */
+        @media (min-width: 981px) {
+          .hero-logo { height: 92px; margin-bottom: 26px; }
+          .hero-grid { grid-template-columns: 1.05fr 0.92fr; gap: clamp(36px,5vw,84px); }
+          .hero-media { max-width: none; }
+          .manifeste-grid { grid-template-columns: 0.5fr 1.5fr; gap: clamp(28px,5vw,64px); }
+          .studios-grid { grid-template-columns: repeat(3, 1fr); gap: clamp(16px,2vw,28px); }
+          .atouts-grid { grid-template-columns: repeat(4, 1fr); }
+          .atout { padding: 30px 26px; }
+          .loc-grid { grid-template-columns: 1fr 1.1fr; gap: clamp(32px,5vw,72px); }
+          .cinema-band { background-attachment: fixed; }
         }
       `}</style>
     </div>
