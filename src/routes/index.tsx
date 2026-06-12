@@ -1,172 +1,232 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useRef } from 'react'
+import { useGSAP } from '@gsap/react'
+import gsap from 'gsap'
 import { useQuery } from 'convex/react'
 import {
   ArrowRight, Wifi, Snowflake, ChefHat, Car, Sparkles, ShieldCheck,
-  MapPin, Phone, MessageCircle, Tv, Mail,
+  MapPin, Phone, MessageCircle, Tv, Mail, BedDouble, KeyRound, Clock,
 } from 'lucide-react'
 import { api } from '../../convex/_generated/api'
 import { StudioCard } from '../components/studios/studio-card'
 import { FALLBACK_STUDIOS } from '../lib/studios-fallback'
-import { Reveal, Stagger, Parallax } from '../components/fx/gsap-fx'
+import { Reveal, Stagger, SplitReveal, ImageReveal } from '../components/fx/gsap-fx'
+import { ReservationBar, StickyBookingCTA } from '../components/booking/reservation-bar'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
 })
 
-const ATOUTS = [
+const HERO_PHOTOS = ['/images/60k/4.jpg', '/images/60k/1.jpg', '/images/45k/2.jpg']
+
+const FACTS = [
+  { icon: ShieldCheck, title: 'Sécurisé 24h/24', note: 'Vigile permanent et accès contrôlé à la résidence.' },
+  { icon: Sparkles, title: 'Propre et entretenu', note: 'Ménage régulier, linge et serviettes fournis.' },
+  { icon: KeyRound, title: 'Prêt à vivre', note: 'Meublé et entièrement équipé : posez vos valises.' },
+  { icon: MessageCircle, title: 'Réservation simple', note: 'Demande en ligne, confirmation rapide par WhatsApp.' },
+]
+
+const EQUIPEMENTS = [
   { icon: Wifi, label: 'Internet WiFi', note: 'Fibre haut débit' },
   { icon: Snowflake, label: 'Climatisation', note: 'Split silencieux' },
-  { icon: ChefHat, label: 'Cuisine équipée', note: 'Tout l\'électroménager' },
+  { icon: ChefHat, label: 'Cuisine équipée', note: 'Électroménager complet' },
+  { icon: BedDouble, label: 'Lit orthopédique', note: 'Couchage 2 places' },
   { icon: Car, label: 'Parking sécurisé', note: 'Accès privatif' },
   { icon: Sparkles, label: 'Service de ménage', note: 'Entretien régulier' },
   { icon: ShieldCheck, label: 'Vigile 24h/24', note: 'Sécurité permanente' },
   { icon: Tv, label: 'Canal+', note: 'Offres Premium' },
-  { icon: MapPin, label: 'Cocody Angré', note: 'Quartier résidentiel' },
+]
+
+const STEPS = [
+  { n: '01', title: 'Choisissez votre résidence', note: 'Studio Standard, Studio Premium ou Appartement 2 pièces, selon votre budget et vos besoins.' },
+  { n: '02', title: 'Envoyez votre demande', note: 'Indiquez vos dates en ligne ou directement par WhatsApp. Aucun paiement à cette étape.' },
+  { n: '03', title: 'On confirme avec vous', note: 'Réponse rapide, 7j/7. Une fois confirmé, votre séjour est réservé.' },
 ]
 
 function HomePage() {
   const studios = useQuery(api.studios.list)
-  // Contenu instantané (SSR + 1er paint) ; Convex temps réel prend le relais.
   const items = studios ?? FALLBACK_STUDIOS
+  const heroRef = useRef<HTMLElement>(null)
+
+  useGSAP(() => {
+    const root = heroRef.current
+    if (!root) return
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const imgs = gsap.utils.toArray<HTMLElement>('.hero-img', root)
+
+    if (!prefersReduced && imgs.length > 1) {
+      const hold = 4.8, fade = 1.5
+      // État de départ explicite : seule la 1re image est visible. Évite le
+      // gotcha immediateRender des fromTo (qui masquait la 1re image au build).
+      gsap.set(imgs, { autoAlpha: 0 })
+      gsap.set(imgs[0], { autoAlpha: 1 })
+      const tl = gsap.timeline({ repeat: -1 })
+      imgs.forEach((img, i) => {
+        const next = imgs[(i + 1) % imgs.length]
+        tl.to(next, { autoAlpha: 1, duration: fade, ease: 'power1.inOut' }, `+=${hold}`)
+          .to(img, { autoAlpha: 0, duration: fade, ease: 'power1.inOut' }, '<')
+      })
+      // Ken-burns très léger : photos ~1000px, on évite de les agrandir (flou).
+      imgs.forEach((img) =>
+        gsap.fromTo(img, { scale: 1.0 }, { scale: 1.05, duration: (hold + fade) * 2.2, ease: 'sine.inOut', repeat: -1, yoyo: true }),
+      )
+    }
+  }, { scope: heroRef })
 
   return (
     <div>
-      {/* ---------- HERO (éditorial : texte + panneau image en fondu) ---------- */}
-      <section className="hero">
-        <div className="hero-glow" aria-hidden />
-        <div className="hero-grid">
-          <div className="hero-copy">
-            <img src="/logo-byoma.png" alt="Les Résidences BYOMA" width={92} height={92} className="hero-logo fade-up" />
-            <span className="kicker kicker--light fade-up">Résidences meublées · Abidjan</span>
-            <h1 className="display fade-up-delay-1" style={{ fontSize: 'clamp(2rem, 7vw, 5.4rem)', color: 'var(--ivory)', marginTop: 22, maxWidth: '12ch' }}>
-              L'art de <em>séjourner</em> à Cocody
-            </h1>
-            <p className="fade-up-delay-2" style={{ marginTop: 20, fontSize: 'clamp(0.92rem, 2.6vw, 1.18rem)', color: 'rgba(245,239,227,0.82)', lineHeight: 1.65, maxWidth: 460 }}>
-              Studios et appartements meublés haut de gamme, pensés pour le calme, le confort et la discrétion. Réservez en ligne, en temps réel.
-            </p>
-            <div className="fade-up-delay-3" style={{ marginTop: 36, display: 'flex', flexWrap: 'wrap', gap: 14 }}>
-              <Link to="/studios" className="btn btn-gold">Découvrir les résidences <ArrowRight size={16} /></Link>
-              <a href="#contact" className="btn btn-on-dark">Nous contacter</a>
-            </div>
+      {/* ---------- HERO : image plein écran + copy en surimpression ---------- */}
+      <section className="hero" ref={heroRef}>
+        <div className="hero-inner">
+          <figure className="hero-figure" aria-hidden>
+            {HERO_PHOTOS.map((src, i) => (
+              <img key={src} src={src} alt={i === 0 ? "Intérieur d'une résidence meublée BYOMA à Cocody" : ''} aria-hidden={i !== 0} className="hero-img" loading="eager" fetchPriority={i === 0 ? 'high' : 'low'} />
+            ))}
+            <div className="hero-scrim" />
+            <div className="hero-grain" />
+          </figure>
 
-            <div className="fade-up-delay-4 hero-stats" style={{ marginTop: 'clamp(36px,5vw,56px)' }}>
-              {[
-                { v: '03', l: 'Catégories' },
-                { v: '24/7', l: 'Sécurité & vigile' },
-                { v: '25K', l: 'FCFA / nuit, dès' },
-              ].map((s) => (
-                <div key={s.l}>
-                  <div className="font-display" style={{ fontSize: 'clamp(1.45rem, 6vw, 1.9rem)', fontWeight: 500, color: 'var(--gold-soft)', lineHeight: 1 }}>{s.v}</div>
-                  <div style={{ fontSize: '0.68rem', color: 'rgba(245,239,227,0.55)', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 6 }}>{s.l}</div>
+          <div className="hero-content">
+            <span className="kicker hero-kicker fade-up">Résidences meublées · Cocody, Abidjan</span>
+            <SplitReveal as="h1" className="display hero-title" immediate delay={0.1}>
+              Votre appartement meublé à Cocody, <em>prêt à vivre.</em>
+            </SplitReveal>
+            <p className="hero-sub fade-up-delay-2">
+              Réservez un studio ou un appartement meublé, propre et sécurisé, à Cocody Angré.
+              Disponibilités en temps réel, réponse rapide par WhatsApp.
+            </p>
+            <div className="hero-underbar fade-up-delay-4">
+              <a href="https://wa.me/2250700255295" target="_blank" rel="noopener noreferrer" className="hero-wa">
+                <MessageCircle size={16} /> Réserver par WhatsApp
+              </a>
+              <span className="hero-trust"><ShieldCheck size={14} /> Sécurisé 24h/24 · dès 25 000 F / nuit</span>
+            </div>
+          </div>
+
+          <div className="hero-rbar fade-up-delay-3">
+            <ReservationBar />
+          </div>
+        </div>
+      </section>
+      <StickyBookingCTA />
+
+      {/* ---------- POURQUOI BYOMA ---------- */}
+      <section className="band-light" style={{ paddingTop: 'clamp(56px,8vw,96px)' }}>
+        <div className="wrap">
+          <Stagger className="facts-grid" stagger={0.07}>
+            {FACTS.map(({ icon: Icon, title, note }) => (
+              <div key={title} className="fact">
+                <span className="fact-ic"><Icon size={20} strokeWidth={1.6} /></span>
+                <div>
+                  <div className="fact-title">{title}</div>
+                  <p className="fact-note">{note}</p>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="hero-media fade-up-delay-2">
-            <span className="hero-frame-accent" aria-hidden />
-            <div className="hero-frame">
-              {['/images/60k/1.jpg', '/images/45k/2.jpg', '/images/60k/4.jpg', '/images/25k/3.jpg'].map((src, i) => (
-                <img
-                  key={src}
-                  src={src}
-                  alt={i === 0 ? 'Intérieur d\'une résidence BYOMA' : ''}
-                  aria-hidden={i !== 0}
-                  className="hero-slide"
-                  style={{ animationDelay: `${i * 5}s` }}
-                />
-              ))}
-              <span className="hero-frame-tag">Appartement Premium · Cocody</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- MANIFESTE ---------- */}
-      <section id="manifeste" style={{ background: 'var(--ivory)', padding: 'clamp(72px,11vw,150px) clamp(24px,5vw,68px)' }}>
-        <div style={{ maxWidth: 1180, margin: '0 auto' }}>
-          <Reveal as="div" className="manifeste-grid">
-            <div>
-              <span className="kicker">L'esprit BYOMA</span>
-              <div className="rule" style={{ marginTop: 18, marginBottom: 30, maxWidth: 120 }} />
-            </div>
-            <p className="display" style={{ fontSize: 'clamp(1.35rem, 4.4vw, 2.7rem)', color: 'var(--noir)', lineHeight: 1.2 }}>
-              Chaque résidence est meublée, équipée et entretenue pour que vous vous sentiez <em>chez vous</em> dès le seuil franchi. Le luxe, ici, c'est le soin du détail.
-            </p>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ---------- BANDEAU IMAGE CINÉMATIQUE ---------- */}
-      <section className="cinema-band" aria-hidden>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(21,18,11,0.4), rgba(21,18,11,0.55))' }} />
-        <Parallax speed={8} style={{ position: 'relative', maxWidth: 880, padding: '0 24px', textAlign: 'center' }}>
-          <p className="display" style={{ fontSize: 'clamp(1.4rem, 5vw, 3.2rem)', color: 'var(--ivory)', lineHeight: 1.2 }}>
-            « Un séjour, <em style={{ color: 'var(--gold-soft)' }}>une parenthèse</em>. »
-          </p>
-        </Parallax>
-      </section>
-
-      {/* ---------- RÉSIDENCES ---------- */}
-      <section id="studios" style={{ background: 'var(--ivory)', padding: 'clamp(72px,10vw,130px) clamp(24px,5vw,68px)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <Reveal style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap', marginBottom: 'clamp(36px,5vw,60px)' }}>
-            <div>
-              <span className="kicker">01 — Nos résidences</span>
-              <h2 className="section-title" style={{ marginTop: 16 }}>Trois adresses,<br />un même art de vivre</h2>
-            </div>
-            <Link to="/studios" className="see-all">Voir tout <ArrowRight size={15} /></Link>
-          </Reveal>
-
-          <Stagger className="studios-grid" stagger={0.08}>
-            {items.map((s, i) => <StudioCard key={s.slug} studio={s} index={i} />)}
+              </div>
+            ))}
           </Stagger>
         </div>
       </section>
 
-      {/* ---------- ATOUTS ---------- */}
-      <section style={{ background: 'var(--noir)', color: 'var(--ivory)', padding: 'clamp(72px,11vw,140px) clamp(24px,5vw,68px)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <Reveal style={{ maxWidth: 620, marginBottom: 'clamp(44px,6vw,72px)' }}>
-            <span className="kicker kicker--light">02 — Le confort BYOMA</span>
-            <h2 className="section-title" style={{ marginTop: 16, color: 'var(--ivory)' }}>Tout est déjà <em style={{ color: 'var(--gold-soft)' }}>prévu</em></h2>
+      {/* ---------- RÉSIDENCES ---------- */}
+      <section id="studios" className="band-light">
+        <div className="wrap">
+          <div className="sec-head">
+            <div>
+              <Reveal as="span" className="kicker">Nos résidences</Reveal>
+              <SplitReveal as="h2" className="section-title" style={{ marginTop: 14 }}>
+                Trois formats, une même exigence de confort
+              </SplitReveal>
+            </div>
+            <Reveal as="p" className="sec-head-note" delay={0.08}>
+              Du studio essentiel à l'appartement deux pièces, chaque résidence est meublée,
+              équipée et entretenue. Choisissez selon votre budget.
+            </Reveal>
+          </div>
+
+          <Stagger className="studios-grid" stagger={0.1}>
+            {items.map((s, i) => <StudioCard key={s.slug} studio={s} index={i} />)}
+          </Stagger>
+
+          <Reveal className="studios-foot">
+            <Link to="/studios" className="btn btn-ghost">Voir les disponibilités <ArrowRight size={16} /></Link>
           </Reveal>
-          <div className="atouts-grid">
-            {ATOUTS.map(({ icon: Icon, label, note }) => (
-              <div key={label} className="atout">
-                <Icon size={24} color="var(--gold)" strokeWidth={1.5} />
-                <div style={{ marginTop: 18 }}>
-                  <div style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--ivory)' }}>{label}</div>
-                  <div style={{ fontSize: '0.82rem', color: 'var(--muted-on-dark)', marginTop: 3 }}>{note}</div>
-                </div>
+        </div>
+      </section>
+
+      {/* ---------- BANDEAU PHOTO CINÉMATIQUE ---------- */}
+      <section className="photo-band-wrap">
+        <ImageReveal className="photo-band" src="/images/60k/5.jpg" alt="Cuisine équipée d'une résidence BYOMA" caption="Cuisine équipée · Cocody Angré" />
+      </section>
+
+      {/* ---------- ÉQUIPEMENTS ---------- */}
+      <section id="equipements" className="band-sand">
+        <div className="wrap">
+          <div className="sec-head">
+            <div>
+              <Reveal as="span" className="kicker">Équipements</Reveal>
+              <SplitReveal as="h2" className="section-title" style={{ marginTop: 14 }}>Tout est déjà là</SplitReveal>
+            </div>
+            <Reveal as="p" className="sec-head-note" delay={0.08}>
+              Vous arrivez, vous vous installez. Chaque résidence dispose de l'essentiel
+              comme du confort, sans frais cachés.
+            </Reveal>
+          </div>
+
+          <Stagger className="equip-grid" stagger={0.05}>
+            {EQUIPEMENTS.map(({ icon: Icon, label, note }) => (
+              <div key={label} className="equip">
+                <Icon size={22} strokeWidth={1.6} />
+                <div className="equip-label">{label}</div>
+                <div className="equip-note">{note}</div>
               </div>
             ))}
+          </Stagger>
+        </div>
+      </section>
+
+      {/* ---------- COMMENT RÉSERVER ---------- */}
+      <section className="band-light">
+        <div className="wrap">
+          <div className="sec-head sec-head--center">
+            <Reveal as="span" className="kicker kicker--plain">Comment réserver</Reveal>
+            <SplitReveal as="h2" className="section-title" style={{ marginTop: 14 }}>Réservé en trois étapes</SplitReveal>
           </div>
+
+          <Stagger className="steps-grid" stagger={0.12}>
+            {STEPS.map((s) => (
+              <div key={s.n} className="step">
+                <span className="step-n">{s.n}</span>
+                <div className="step-title">{s.title}</div>
+                <p className="step-note">{s.note}</p>
+              </div>
+            ))}
+          </Stagger>
         </div>
       </section>
 
       {/* ---------- LOCALISATION ---------- */}
-      <section id="localisation" style={{ background: 'var(--ivory)', padding: 'clamp(72px,11vw,140px) clamp(24px,5vw,68px)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <Reveal as="div" className="loc-grid">
+      <section id="localisation" className="band-sand">
+        <div className="wrap">
+          <Reveal className="loc-grid">
             <div>
-              <span className="kicker">03 — Localisation</span>
-              <h2 className="section-title" style={{ marginTop: 16 }}>Au cœur de<br />Cocody Angré</h2>
-              <p style={{ marginTop: 24, color: 'var(--ink-soft)', fontSize: '1.05rem', lineHeight: 1.8, maxWidth: 460 }}>
-                À Angré Djomi, derrière la pharmacie St Ambroise. Un quartier résidentiel calme et sûr, proche des commodités, des restaurants et des grands axes d'Abidjan.
+              <Reveal as="span" className="kicker">Localisation</Reveal>
+              <SplitReveal as="h2" className="section-title" style={{ marginTop: 14 }}>Au cœur de Cocody Angré</SplitReveal>
+              <p className="lead" style={{ marginTop: 20, maxWidth: 440 }}>
+                À Angré Djomi, derrière la pharmacie St Ambroise. Un quartier résidentiel
+                calme et sûr, proche des commodités, des restaurants et des grands axes d'Abidjan.
               </p>
-              <div style={{ marginTop: 26, display: 'flex', alignItems: 'flex-start', gap: 12, color: 'var(--ink)' }}>
-                <MapPin size={18} color="var(--gold-deep)" style={{ flexShrink: 0, marginTop: 3 }} />
-                <span>Angré Djomi, derrière la pharmacie St Ambroise<br />Cocody, Abidjan — Côte d'Ivoire</span>
+              <div className="loc-addr">
+                <MapPin size={18} />
+                <span>Angré Djomi, derrière la pharmacie St Ambroise<br />Cocody, Abidjan · Côte d'Ivoire</span>
               </div>
-              <Link to="/studios" className="btn btn-primary" style={{ marginTop: 32 }}>Réserver un séjour <ArrowRight size={16} /></Link>
+              <Link to="/studios" className="btn btn-primary" style={{ marginTop: 28 }}>Réserver un séjour <ArrowRight size={16} /></Link>
             </div>
-            <div style={{ position: 'relative', minHeight: 420, border: '1px solid var(--line)', overflow: 'hidden' }}>
+            <div className="loc-map">
               <iframe
                 title="Carte — Les Résidences BYOMA, Angré Djomi Cocody"
                 src="https://www.google.com/maps?q=Angr%C3%A9%20Djomi%20pharmacie%20Saint%20Ambroise%20Cocody%20Abidjan&output=embed"
                 width="100%" height="100%"
-                style={{ border: 0, minHeight: 420, display: 'block', filter: 'grayscale(0.3) sepia(0.12)' }}
+                style={{ border: 0, minHeight: 380, display: 'block' }}
                 loading="lazy" referrerPolicy="no-referrer-when-downgrade"
               />
             </div>
@@ -174,74 +234,190 @@ function HomePage() {
         </div>
       </section>
 
-      {/* ---------- CONTACT ---------- */}
-      <section id="contact" style={{ background: 'var(--noir-2)', color: 'var(--ivory)', padding: 'clamp(72px,11vw,140px) clamp(24px,5vw,68px)' }}>
-        <Reveal style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
-          <span className="kicker kicker--light">Réservation</span>
-          <h2 className="section-title" style={{ marginTop: 18, color: 'var(--ivory)' }}>Réservez votre <em style={{ color: 'var(--gold-soft)' }}>séjour</em></h2>
-          <p style={{ marginTop: 18, color: 'var(--muted-on-dark)', fontSize: '1.05rem', maxWidth: 540, margin: '18px auto 0' }}>
-            Notre équipe vous répond rapidement par téléphone, WhatsApp ou e-mail pour confirmer votre réservation.
-          </p>
-          <div style={{ marginTop: 40, display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'center' }}>
-            <a href="tel:+2250700255295" className="contact-pill"><Phone size={17} color="var(--gold)" /> 07 00 25 52 95</a>
-            <a href="https://wa.me/2250700255295" target="_blank" rel="noopener noreferrer" className="contact-pill"><MessageCircle size={17} color="var(--gold)" /> WhatsApp</a>
-            <a href="mailto:lesresidencesbyoma@byoma.ci" className="contact-pill"><Mail size={17} color="var(--gold)" /> E-mail</a>
-          </div>
-          <div style={{ marginTop: 40 }}>
-            <Link to="/studios" className="btn btn-gold">Voir les disponibilités <ArrowRight size={16} /></Link>
-          </div>
-        </Reveal>
+      {/* ---------- RÉSERVER / CONTACT ---------- */}
+      <section id="reserver" className="band-light">
+        <div className="wrap">
+          <Reveal className="reserve-card">
+            <div className="reserve-copy">
+              <Reveal as="span" className="kicker">Réservation</Reveal>
+              <SplitReveal as="h2" className="section-title" style={{ marginTop: 14 }}>Réservez votre séjour</SplitReveal>
+              <p className="lead" style={{ marginTop: 18, maxWidth: 460 }}>
+                Une question, une date, une confirmation ? Notre équipe vous répond
+                rapidement par téléphone, WhatsApp ou e-mail, 7j/7.
+              </p>
+              <div className="reserve-hours">
+                <Clock size={15} /> Réponse rapide, 7 jours sur 7
+              </div>
+            </div>
+            <div className="reserve-actions">
+              <a href="tel:+2250700255295" className="reserve-row">
+                <span className="reserve-ic"><Phone size={18} /></span>
+                <span><strong>07 00 25 52 95</strong><em>05 08 69 07 98</em></span>
+                <ArrowRight size={16} />
+              </a>
+              <a href="https://wa.me/2250700255295" target="_blank" rel="noopener noreferrer" className="reserve-row">
+                <span className="reserve-ic"><MessageCircle size={18} /></span>
+                <span><strong>WhatsApp</strong><em>Le plus rapide pour réserver</em></span>
+                <ArrowRight size={16} />
+              </a>
+              <a href="mailto:lesresidencesbyoma@byoma.ci" className="reserve-row">
+                <span className="reserve-ic"><Mail size={18} /></span>
+                <span><strong>E-mail</strong><em>lesresidencesbyoma@byoma.ci</em></span>
+                <ArrowRight size={16} />
+              </a>
+              <Link to="/studios" className="btn btn-primary" style={{ width: '100%', marginTop: 6 }}>
+                Voir les disponibilités <ArrowRight size={16} />
+              </Link>
+            </div>
+          </Reveal>
+        </div>
       </section>
 
       <style>{`
-        /* ---- Base = mobile-first ; on monte ensuite en min-width ---- */
-        .hero { position: relative; background: var(--noir); overflow: hidden; padding: clamp(100px,22vw,168px) clamp(20px,5vw,68px) clamp(56px,9vw,108px); }
-        .hero-logo { height: 72px; width: auto; display: block; background: var(--ivory); border-radius: 14px; padding: 8px; margin-bottom: 20px; box-shadow: 0 16px 40px -20px rgba(0,0,0,0.6); }
-        .hero-glow { position: absolute; top: -25%; right: -12%; width: 62%; height: 95%; background: radial-gradient(circle, rgba(201,168,76,0.16), transparent 64%); pointer-events: none; }
-        .hero-grid { position: relative; max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: clamp(40px,8vw,56px); align-items: center; }
-        .hero-media { position: relative; max-width: 460px; }
-        .hero-frame { position: relative; aspect-ratio: 4 / 5; overflow: hidden; border: 1px solid rgba(224,201,136,0.32); }
-        .hero-frame-accent { position: absolute; inset: 0; transform: translate(16px, 16px); border: 1px solid rgba(224,201,136,0.32); pointer-events: none; }
-        .hero-slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; animation: heroSlide 20s infinite; }
-        .hero-slide:first-child { opacity: 1; }
-        @keyframes heroSlide {
-          0% { opacity: 0; transform: scale(1.06); }
-          3% { opacity: 1; }
-          22% { opacity: 1; transform: scale(1.0); }
-          27% { opacity: 0; }
-          100% { opacity: 0; }
+        .wrap { max-width: 1240px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 64px); }
+        .band-light { background: var(--ivory); padding: clamp(64px, 9vw, 120px) 0; }
+        .band-sand { background: var(--sand); padding: clamp(64px, 9vw, 120px) 0; }
+
+        /* ====== HERO ======
+           Mobile (base) : photo en fond plein écran, texte clair en surimpression.
+           Desktop (>=920px) : photo dans un rectangle arrondi, fond clair, texte sombre. */
+        .hero { position: relative; min-height: 100vh; min-height: 100dvh; display: flex; overflow: hidden; background: var(--noir); }
+        .hero-inner { position: relative; width: 100%; max-width: 1240px; margin: 0 auto;
+          display: flex; flex-direction: column; justify-content: center;
+          padding: clamp(78px, 11vh, 108px) clamp(20px, 6vw, 40px) clamp(22px, 5vw, 40px); }
+        /* --- figure : fond plein écran sur mobile --- */
+        .hero-figure { position: absolute; inset: 0; z-index: 0; margin: 0; overflow: hidden; }
+        .hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; will-change: transform, opacity; filter: contrast(1.04) saturate(1.05) brightness(0.97); }
+        .hero-img:first-child { opacity: 1; }
+        .hero-scrim { position: absolute; inset: 0; background:
+          linear-gradient(180deg, rgba(18,14,9,0.55) 0%, rgba(18,14,9,0.22) 28%, rgba(18,14,9,0.42) 60%, rgba(18,14,9,0.86) 100%); }
+        .hero-grain { position: absolute; inset: 0; pointer-events: none; opacity: 0.055; mix-blend-mode: overlay;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        .hero-content { position: relative; z-index: 2; max-width: 600px; }
+        .hero-kicker { color: var(--gold-soft); }
+        .hero-kicker::before { background: var(--gold-soft); }
+        .hero-title { color: var(--ivory); font-size: clamp(1.5rem, 6vw, 2.5rem); line-height: 1.08; margin: 12px 0 0; max-width: 18ch; }
+        .hero-title em { color: var(--gold-soft); font-style: italic; }
+        .hero-sub { margin-top: 11px; max-width: 520px; color: rgba(251,247,238,0.86); font-size: clamp(0.84rem, 2vw, 1rem); line-height: 1.5; }
+        .hero-underbar { margin-top: 13px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+        .hero-wa { display: inline-flex; align-items: center; gap: 7px; color: var(--ivory); font-weight: 600; font-size: 0.84rem; transition: color 0.2s ease; }
+        .hero-wa svg { color: var(--gold-soft); width: 15px; height: 15px; }
+        .hero-wa:hover { color: var(--gold-soft); }
+        .hero-trust { display: inline-flex; align-items: center; gap: 7px; color: rgba(251,247,238,0.66); font-size: 0.78rem; }
+        .hero-trust svg { color: var(--gold-soft); }
+        .hero-rbar { position: relative; z-index: 2; margin-top: clamp(14px, 3vw, 22px); }
+
+        /* --- Desktop : photo contenue dans un rectangle arrondi, fond clair --- */
+        @media (min-width: 920px) {
+          /* le hero centre verticalement son bloc (pas de stretch) -> vrai centrage */
+          .hero { background: var(--ivory); align-items: center; }
+          .hero-inner {
+            display: grid;
+            grid-template-columns: 1.04fr 0.96fr;
+            grid-template-areas: "content figure" "rbar rbar";
+            gap: clamp(16px, 2.2vw, 30px) clamp(36px, 5vw, 72px);
+            align-items: center;
+            padding: clamp(46px, 6vh, 72px) clamp(28px, 5vw, 64px);
+          }
+          .hero-content { grid-area: content; max-width: 620px; }
+          .hero-rbar { grid-area: rbar; margin-top: 0; }
+          .hero-figure { grid-area: figure; position: relative; inset: auto; aspect-ratio: 3 / 2; max-height: 54vh;
+            border-radius: 22px; border: 1px solid var(--line); box-shadow: 0 40px 70px -34px rgba(34,28,19,0.45); }
+          .hero-img { filter: contrast(1.02) saturate(1.04); }
+          .hero-scrim { display: none; }
+          .hero-grain { opacity: 0.03; border-radius: 22px; }
+          /* texte sombre sur fond clair */
+          .hero-kicker { color: var(--gold-deep); }
+          .hero-kicker::before { background: var(--gold); }
+          .hero-title { color: var(--noir); font-size: clamp(2.3rem, 4vw, 3.5rem); }
+          .hero-title em { color: var(--gold-deep); }
+          .hero-sub { color: var(--ink-soft); }
+          .hero-wa { color: var(--noir); }
+          .hero-wa svg { color: var(--gold-deep); }
+          .hero-wa:hover { color: var(--gold-deep); }
+          .hero-trust { color: var(--muted); }
+          .hero-trust svg { color: var(--gold-deep); }
         }
-        .hero-frame-tag { position: absolute; left: 14px; bottom: 14px; z-index: 3; padding: 7px 13px; background: rgba(21,18,11,0.62); backdrop-filter: blur(5px); color: var(--gold-soft); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
-        .hero-stats { display: flex; gap: clamp(20px,5vw,48px); flex-wrap: wrap; }
-        .hero-stats > div { padding-top: 20px; border-top: 1px solid rgba(224,201,136,0.22); }
-        @media (prefers-reduced-motion: reduce) {
-          .hero-slide { animation: none; opacity: 0; }
-          .hero-slide:first-child { opacity: 1; }
+
+        /* ---- Sections : entête ---- */
+        .sec-head { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: end; margin-bottom: clamp(34px, 5vw, 56px); }
+        .sec-head-note { color: var(--ink-soft); max-width: 440px; font-size: 1rem; }
+        .sec-head--center { text-align: center; justify-items: center; }
+        .sec-head--center .kicker { justify-content: center; }
+
+        /* ---- Facts ---- */
+        .facts-grid { display: grid; grid-template-columns: 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+        .fact { background: var(--paper); padding: 26px 24px; display: flex; gap: 16px; align-items: flex-start; }
+        .fact-ic { flex-shrink: 0; width: 46px; height: 46px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: var(--gold-wash); color: var(--gold-deep); }
+        .fact-title { font-weight: 600; font-size: 1.02rem; color: var(--noir); }
+        .fact-note { margin: 5px 0 0; font-size: 0.9rem; color: var(--ink-soft); line-height: 1.55; }
+
+        /* ---- Résidences ---- */
+        .studios-grid { display: grid; grid-template-columns: 1fr; gap: clamp(18px, 3vw, 28px); }
+        .studios-foot { margin-top: clamp(32px, 5vw, 48px); display: flex; justify-content: center; }
+
+        /* ---- Bandeau photo ---- */
+        .photo-band-wrap { background: var(--ivory); }
+        .photo-band { position: relative; height: clamp(280px, 46vw, 520px); overflow: hidden; }
+        .photo-band img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .photo-band-cap {
+          position: absolute; left: clamp(20px,5vw,64px); bottom: clamp(20px,4vw,40px);
+          padding: 9px 16px; background: rgba(20,16,10,0.66); backdrop-filter: blur(6px);
+          color: var(--gold-soft); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; border-radius: 999px;
         }
-        .manifeste-grid { display: grid; grid-template-columns: 1fr; gap: clamp(24px,5vw,64px); align-items: start; }
-        .cinema-band { position: relative; min-height: clamp(320px, 52vh, 560px); display: flex; align-items: center; justify-content: center; background-image: url('/images/45k/3.jpg'); background-size: cover; background-position: center; background-attachment: scroll; }
-        .studios-grid { display: grid; grid-template-columns: 1fr; gap: clamp(16px,4vw,28px); }
-        .atouts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line-dark); border: 1px solid var(--line-dark); }
-        .atout { background: var(--noir); padding: 26px 22px; }
-        .loc-grid { display: grid; grid-template-columns: 1fr; gap: clamp(28px,6vw,72px); align-items: center; }
-        .see-all { display: inline-flex; align-items: center; gap: 8px; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-deep); padding-bottom: 4px; border-bottom: 1px solid var(--gold-deep); white-space: nowrap; }
-        .contact-pill { display: inline-flex; align-items: center; gap: 10px; padding: 14px 24px; border: 1px solid var(--line-dark); color: var(--ivory); font-size: 0.92rem; transition: border-color 0.3s ease, background 0.3s ease; }
-        .contact-pill:hover { border-color: var(--gold); background: rgba(201,168,76,0.08); }
-        /* >= tablette : la grille des residences passe a 2 colonnes */
-        @media (min-width: 601px) {
-          .studios-grid { grid-template-columns: repeat(2, 1fr); }
+
+        /* ---- Équipements ---- */
+        .equip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(12px, 2vw, 18px); }
+        .equip { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 20px; color: var(--gold-deep); transition: border-color 0.3s var(--ease), transform 0.3s var(--ease); }
+        .equip:hover { border-color: var(--gold-soft); transform: translateY(-3px); }
+        .equip-label { margin-top: 14px; font-weight: 600; font-size: 0.98rem; color: var(--noir); }
+        .equip-note { margin-top: 3px; font-size: 0.82rem; color: var(--ink-soft); }
+
+        /* ---- Étapes ---- */
+        .steps-grid { display: grid; grid-template-columns: 1fr; gap: clamp(16px, 3vw, 28px); }
+        .step { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 30px 26px; }
+        .step-n { font-family: var(--font-display); font-style: italic; font-size: 2.4rem; font-weight: 400; color: var(--gold-soft); line-height: 1; }
+        .step-title { margin-top: 14px; font-weight: 600; font-size: 1.1rem; color: var(--noir); }
+        .step-note { margin: 8px 0 0; font-size: 0.92rem; color: var(--ink-soft); line-height: 1.6; }
+
+        /* ---- Localisation ---- */
+        .loc-grid { display: grid; grid-template-columns: 1fr; gap: clamp(28px, 5vw, 56px); align-items: center; }
+        .loc-addr { margin-top: 24px; display: flex; gap: 12px; align-items: flex-start; color: var(--ink); font-size: 0.95rem; line-height: 1.55; }
+        .loc-addr svg { color: var(--gold-deep); flex-shrink: 0; margin-top: 2px; }
+        .loc-map { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow-card); min-height: 380px; }
+        .loc-map iframe { filter: grayscale(0.2) sepia(0.06); }
+
+        /* ---- Réserver ---- */
+        .reserve-card { display: grid; grid-template-columns: 1fr; gap: clamp(28px, 4vw, 48px); background: var(--noir); border-radius: clamp(18px, 3vw, 28px); padding: clamp(32px, 5vw, 56px); color: var(--ivory); box-shadow: var(--shadow-soft); }
+        .reserve-card .section-title { color: var(--ivory); }
+        .reserve-card .kicker { color: var(--gold-soft); }
+        .reserve-card .kicker::before { background: var(--gold-soft); }
+        .reserve-card .lead { color: var(--muted-on-dark); }
+        .reserve-hours { margin-top: 22px; display: inline-flex; align-items: center; gap: 9px; font-size: 0.86rem; color: var(--gold-soft); }
+        .reserve-actions { display: flex; flex-direction: column; gap: 12px; }
+        .reserve-row { display: flex; align-items: center; gap: 16px; padding: 16px 18px; border: 1px solid rgba(251,247,238,0.16); border-radius: 14px; background: rgba(251,247,238,0.03); color: var(--ivory); transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease; }
+        .reserve-row:hover { border-color: var(--gold-soft); background: rgba(217,185,120,0.08); transform: translateX(3px); }
+        .reserve-row span:nth-child(2) { display: flex; flex-direction: column; flex: 1; line-height: 1.3; }
+        .reserve-row strong { font-size: 1rem; font-weight: 600; }
+        .reserve-row em { font-style: normal; font-size: 0.8rem; color: var(--muted-on-dark); margin-top: 2px; }
+        .reserve-row > svg { color: var(--gold-soft); flex-shrink: 0; }
+        .reserve-ic { width: 44px; height: 44px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: var(--gold-wash); color: var(--gold-soft); }
+
+        /* ====== >= tablette ====== */
+        @media (min-width: 620px) {
+          .facts-grid { grid-template-columns: 1fr 1fr; }
+          .studios-grid { grid-template-columns: 1fr 1fr; }
+          .steps-grid { grid-template-columns: repeat(3, 1fr); }
         }
-        /* >= desktop : layouts multi-colonnes complets + parallaxe fond fixe */
+        /* ====== >= desktop ====== */
         @media (min-width: 981px) {
-          .hero-logo { height: 92px; margin-bottom: 26px; }
-          .hero-grid { grid-template-columns: 1.05fr 0.92fr; gap: clamp(36px,5vw,84px); }
-          .hero-media { max-width: none; }
-          .manifeste-grid { grid-template-columns: 0.5fr 1.5fr; gap: clamp(28px,5vw,64px); }
-          .studios-grid { grid-template-columns: repeat(3, 1fr); gap: clamp(16px,2vw,28px); }
-          .atouts-grid { grid-template-columns: repeat(4, 1fr); }
-          .atout { padding: 30px 26px; }
-          .loc-grid { grid-template-columns: 1fr 1.1fr; gap: clamp(32px,5vw,72px); }
-          .cinema-band { background-attachment: fixed; }
+          .sec-head { grid-template-columns: 1.4fr 1fr; gap: 40px; }
+          .sec-head--center { grid-template-columns: 1fr; }
+          .facts-grid { grid-template-columns: repeat(4, 1fr); }
+          .studios-grid { grid-template-columns: repeat(3, 1fr); }
+          .equip-grid { grid-template-columns: repeat(4, 1fr); }
+          .loc-grid { grid-template-columns: 1fr 1.1fr; }
+          .reserve-card { grid-template-columns: 1fr 1fr; align-items: center; }
         }
       `}</style>
     </div>

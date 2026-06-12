@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import viteReact from '@vitejs/plugin-react'
 import { nitro } from 'nitro/vite'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 import tailwindcss from '@tailwindcss/vite'
@@ -27,6 +28,10 @@ export default defineConfig({
     // temps réel : pas de prérendu statique au build pour éviter de figer
     // l'état ou d'échouer faute de connexion Convex au moment du build.
     tanstackStart(),
+    // React Refresh / Fast Refresh (HMR) en dev + transformation JSX.
+    // Requis par TanStack Start en mode dev (sinon le client entry échoue
+    // et l'app tourne en SSR seul, sans hydratation ni JS client).
+    viteReact(),
     nitro({ preset: process.env.NITRO_PRESET ?? 'vercel' }),
   ],
 })

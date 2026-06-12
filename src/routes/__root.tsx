@@ -38,7 +38,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
       { title: SITE.title },
       { name: 'description', content: SITE.description },
-      { name: 'theme-color', content: '#15120B' },
+      { name: 'theme-color', content: '#FBF7EE' },
       { name: 'format-detection', content: 'telephone=no' },
       { property: 'og:type', content: 'website' },
       { property: 'og:locale', content: 'fr_CI' },

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Loader2, AlertCircle, Lock } from 'lucide-react'
+import { Loader2, AlertCircle } from 'lucide-react'
 import { authClient, useSession } from '../../lib/auth/auth-client'
 
 export const Route = createFileRoute('/admin/connexion')({
@@ -40,44 +40,122 @@ function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', background: 'var(--dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ width: '100%', maxWidth: 400 }}>
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '0.625rem', fontWeight: 600, letterSpacing: '0.25em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.7)', display: 'block' }}>LES RÉSIDENCES</span>
-          <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2.25rem', fontWeight: 700, color: '#fff', letterSpacing: '0.08em', display: 'block' }}>BYOMA</span>
-          <span style={{ fontSize: '0.6875rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--gold)' }}>Administration</span>
+    <div className="login-page">
+      <div className="login-card fade-up">
+        <div className="login-head">
+          <img src="/logo-byoma.png" alt="Les Résidences BYOMA" className="login-logo" />
+          <h1 className="section-title login-title">Espace administration</h1>
+          <p className="login-sub">Connexion réservée à l'équipe BYOMA.</p>
         </div>
 
-        <form onSubmit={onSubmit} style={{ background: 'var(--surface)', borderRadius: 6, padding: 28 }}>
-          <h1 className="font-display" style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--dark)', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Lock size={18} color="var(--gold-dark)" /> Connexion
-          </h1>
-          <p style={{ fontSize: '0.875rem', color: 'var(--muted-2)', margin: '0 0 20px' }}>Espace réservé à l'équipe BYOMA.</p>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <label style={{ display: 'block' }}>
-              <span style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--muted-2)', marginBottom: 6 }}>E-mail</span>
-              <input name="email" type="email" className="input-byoma" placeholder="admin@byoma.ci" autoComplete="email" />
+        <form onSubmit={onSubmit} noValidate>
+          <div className="login-fields">
+            <label className="login-label">
+              <span>E-mail</span>
+              <input
+                name="email"
+                type="email"
+                className="input-byoma"
+                placeholder="admin@byoma.ci"
+                autoComplete="email"
+                autoFocus
+              />
             </label>
-            <label style={{ display: 'block' }}>
-              <span style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--muted-2)', marginBottom: 6 }}>Mot de passe</span>
-              <input name="password" type="password" className="input-byoma" placeholder="••••••••" autoComplete="current-password" />
+            <label className="login-label">
+              <span>Mot de passe</span>
+              <input
+                name="password"
+                type="password"
+                className="input-byoma"
+                placeholder="••••••••"
+                autoComplete="current-password"
+              />
             </label>
           </div>
 
           {error && (
-            <div role="alert" style={{ marginTop: 16, display: 'flex', gap: 8, alignItems: 'center', background: 'var(--error-light)', border: '1px solid #F0C9C4', borderRadius: 4, padding: '10px 12px', color: 'var(--error)', fontSize: '0.875rem' }}>
+            <div role="alert" className="login-error">
               <AlertCircle size={16} /> {error}
             </div>
           )}
 
-          <button type="submit" className="btn-gold" disabled={submitting} style={{ marginTop: 20, width: '100%', opacity: submitting ? 0.7 : 1 }}>
+          <button type="submit" className="btn-primary login-submit" disabled={submitting}>
             {submitting ? <Loader2 size={16} className="spin" /> : null}
             {submitting ? 'Connexion…' : 'Se connecter'}
           </button>
         </form>
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}}.spin{animation:spin .8s linear infinite}`}</style>
       </div>
+
+      <style>{`
+        .login-page {
+          min-height: 100dvh;
+          background: var(--ivory);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: clamp(40px, 8vw, 72px) 20px;
+        }
+        .login-card {
+          width: 100%;
+          max-width: 420px;
+          background: var(--paper);
+          border: 1px solid var(--line);
+          border-radius: var(--radius);
+          box-shadow: var(--shadow-card);
+          padding: clamp(28px, 6vw, 44px) clamp(24px, 5vw, 40px);
+        }
+        .login-head { text-align: center; margin-bottom: clamp(24px, 5vw, 32px); }
+        .login-logo {
+          display: block;
+          height: 52px;
+          width: auto;
+          margin: 0 auto 20px;
+          object-fit: contain;
+        }
+        .login-title {
+          font-size: clamp(1.4rem, 5vw, 1.9rem);
+          margin: 0;
+        }
+        .login-sub {
+          margin: 8px 0 0;
+          font-size: 0.9rem;
+          color: var(--ink-soft);
+        }
+
+        .login-fields { display: flex; flex-direction: column; gap: 16px; }
+        .login-label { display: block; }
+        .login-label > span {
+          display: block;
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: var(--ink-soft);
+          margin-bottom: 7px;
+        }
+
+        .login-error {
+          margin-top: 16px;
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          background: var(--error-light);
+          border: 1px solid rgba(178, 59, 46, 0.22);
+          border-radius: var(--radius-sm);
+          padding: 11px 13px;
+          color: var(--error);
+          font-size: 0.86rem;
+          line-height: 1.4;
+        }
+        .login-error svg { flex-shrink: 0; }
+
+        .login-submit {
+          margin-top: 22px;
+          width: 100%;
+        }
+        .login-submit:disabled { opacity: 0.65; cursor: default; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin 0.8s linear infinite; }
+      `}</style>
     </div>
   )
 }

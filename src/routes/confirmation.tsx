@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { CheckCircle2, Phone, MessageCircle, ArrowRight } from 'lucide-react'
+import { Check, Phone, MessageCircle, ArrowRight } from 'lucide-react'
 import { formatDate } from '../lib/format'
 
 type ConfirmationSearch = { studio?: string; checkIn?: string; checkOut?: string }
@@ -18,50 +18,180 @@ function ConfirmationPage() {
   const { studio, checkIn, checkOut } = Route.useSearch()
 
   return (
-    <div style={{ background: 'var(--ivory)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(110px,14vw,150px) 24px clamp(60px,8vw,90px)' }}>
-      <div style={{ maxWidth: 560, width: '100%', textAlign: 'center' }} className="fade-up">
-        <div style={{ width: 72, height: 72, border: '1px solid var(--gold-deep)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 26px' }}>
-          <CheckCircle2 size={34} color="var(--gold-deep)" strokeWidth={1.5} />
+    <div className="confirm-page">
+      <div className="confirm-card fade-up">
+        <div className="confirm-icon" aria-hidden>
+          <Check size={32} strokeWidth={2.4} />
         </div>
 
-        <div className="kicker">Demande envoyée</div>
-        <h1 className="section-title" style={{ marginTop: 12 }}>Merci, nous avons bien reçu votre demande</h1>
-        <p style={{ marginTop: 16, color: 'var(--muted-2)', fontSize: '1.0625rem', lineHeight: 1.7 }}>
+        <span className="kicker confirm-kicker">Demande envoyée</span>
+        <h1 className="section-title confirm-title">Votre demande est bien envoyée</h1>
+        <p className="lead confirm-lead">
           Notre équipe vous recontacte rapidement par téléphone ou WhatsApp pour confirmer votre réservation
-          {studio ? <> du <strong style={{ color: 'var(--dark)' }}>{studio}</strong></> : null}.
+          {studio ? <> du <strong className="confirm-strong">{studio}</strong></> : null}.
         </p>
 
         {(studio || checkIn) && (
-          <div style={{ marginTop: 28, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 4, padding: 22, textAlign: 'left' }}>
+          <div className="confirm-recap">
             {studio && <Row label="Logement" value={studio} />}
             {checkIn && <Row label="Arrivée" value={formatDate(checkIn)} />}
             {checkOut && <Row label="Départ" value={formatDate(checkOut)} />}
-            <p style={{ margin: '14px 0 0', fontSize: '0.8125rem', color: 'var(--muted)', lineHeight: 1.5 }}>
+            <p className="confirm-recap-note">
               Ces dates restent susceptibles d'être confirmées par notre équipe selon les disponibilités finales.
             </p>
           </div>
         )}
 
-        <div style={{ marginTop: 28, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}>
-          <a href="tel:+2250700255295" className="btn-gold"><Phone size={16} /> Appeler maintenant</a>
-          <a href="https://wa.me/2250700255295" target="_blank" rel="noopener noreferrer" className="btn-outline-gold"><MessageCircle size={16} /> WhatsApp</a>
+        <div className="confirm-actions">
+          <Link to="/studios" className="btn-primary confirm-btn">
+            Voir les résidences <ArrowRight size={16} />
+          </Link>
+          <Link to="/" className="btn-ghost confirm-btn">Retour à l'accueil</Link>
         </div>
 
-        <div style={{ marginTop: 24 }}>
-          <Link to="/studios" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--gold-dark)', fontSize: '0.875rem', fontWeight: 600, textDecoration: 'none' }}>
-            Voir les autres logements <ArrowRight size={15} />
-          </Link>
+        <div className="confirm-contact">
+          <span className="confirm-contact-label">Besoin d'une réponse immédiate ?</span>
+          <div className="confirm-contact-links">
+            <a href="tel:+2250700255295" className="confirm-contact-link">
+              <Phone size={15} /> Appeler
+            </a>
+            <a
+              href="https://wa.me/2250700255295"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="confirm-contact-link"
+            >
+              <MessageCircle size={15} /> WhatsApp
+            </a>
+          </div>
         </div>
       </div>
+
+      <style>{`
+        .confirm-page {
+          min-height: 100dvh;
+          background: var(--ivory);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: clamp(120px, 16vw, 160px) 20px clamp(56px, 9vw, 88px);
+        }
+        .confirm-card {
+          width: 100%;
+          max-width: 560px;
+          background: var(--paper);
+          border: 1px solid var(--line);
+          border-radius: var(--radius);
+          box-shadow: var(--shadow-card);
+          padding: clamp(30px, 6vw, 52px) clamp(24px, 5vw, 48px);
+          text-align: center;
+        }
+        .confirm-icon {
+          width: 76px;
+          height: 76px;
+          margin: 0 auto clamp(22px, 4vw, 30px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 999px;
+          background: var(--gold-wash);
+          color: var(--gold-deep);
+          box-shadow: inset 0 0 0 1.5px var(--gold-deep);
+        }
+        .confirm-kicker { justify-content: center; }
+        .confirm-title {
+          margin: 14px 0 0;
+          font-size: clamp(1.6rem, 6vw, 2.6rem);
+        }
+        .confirm-lead {
+          margin: 16px auto 0;
+          max-width: 44ch;
+        }
+        .confirm-strong { color: var(--noir); font-weight: 600; }
+
+        .confirm-recap {
+          margin-top: clamp(26px, 4vw, 32px);
+          background: var(--sand);
+          border: 1px solid var(--line);
+          border-radius: var(--radius-sm);
+          padding: clamp(18px, 4vw, 24px);
+          text-align: left;
+        }
+        .confirm-recap-note {
+          margin: 14px 0 0;
+          font-size: 0.82rem;
+          color: var(--muted);
+          line-height: 1.55;
+        }
+
+        .confirm-row {
+          display: flex;
+          justify-content: space-between;
+          gap: 16px;
+          padding: 9px 0;
+          border-bottom: 1px solid var(--line-soft);
+        }
+        .confirm-row:last-of-type { border-bottom: none; }
+        .confirm-row-label { color: var(--ink-soft); font-size: 0.88rem; }
+        .confirm-row-value { color: var(--noir); font-size: 0.94rem; font-weight: 600; }
+
+        .confirm-actions {
+          margin-top: clamp(28px, 5vw, 36px);
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        .confirm-btn { width: 100%; }
+
+        .confirm-contact {
+          margin-top: clamp(26px, 4vw, 32px);
+          padding-top: clamp(22px, 4vw, 28px);
+          border-top: 1px solid var(--line-soft);
+        }
+        .confirm-contact-label {
+          display: block;
+          font-size: 0.82rem;
+          color: var(--muted);
+          margin-bottom: 12px;
+        }
+        .confirm-contact-links {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 10px;
+        }
+        .confirm-contact-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          min-height: 44px;
+          padding: 10px 18px;
+          border: 1px solid var(--line);
+          border-radius: 999px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: var(--gold-deep);
+          transition: border-color 0.25s var(--ease), background 0.25s var(--ease), color 0.25s var(--ease);
+        }
+        .confirm-contact-link:hover {
+          border-color: var(--gold-deep);
+          background: var(--gold-wash);
+        }
+
+        @media (min-width: 480px) {
+          .confirm-actions { flex-direction: row; justify-content: center; }
+          .confirm-btn { width: auto; flex: 1; }
+        }
+      `}</style>
     </div>
   )
 }
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, padding: '8px 0', borderBottom: '1px solid var(--cream-2)' }}>
-      <span style={{ color: 'var(--muted-2)', fontSize: '0.875rem' }}>{label}</span>
-      <strong style={{ color: 'var(--dark)', fontSize: '0.9375rem' }}>{value}</strong>
+    <div className="confirm-row">
+      <span className="confirm-row-label">{label}</span>
+      <strong className="confirm-row-value">{value}</strong>
     </div>
   )
 }

@@ -21,7 +21,7 @@ const CATEGORY_LABEL: Record<StudioSummary['category'], string> = {
 
 export function StudioCard({ studio, index = 0 }: { studio: StudioSummary; index?: number }) {
   return (
-    <Link to="/studios/$slug" params={{ slug: studio.slug }} className="studio-card">
+    <Link to="/studios/$slug" params={{ slug: studio.slug }} search={{}} className="studio-card">
       <div className="ph" style={{ position: 'relative', aspectRatio: '4 / 5' }}>
         <img
           src={studio.photos[0]}
@@ -29,37 +29,34 @@ export function StudioCard({ studio, index = 0 }: { studio: StudioSummary; index
           loading={index < 2 ? 'eager' : 'lazy'}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
-        <span className="index-num" style={{ position: 'absolute', top: 16, left: 18, color: 'var(--ivory)', mixBlendMode: 'difference' }}>
-          0{index + 1}
-        </span>
-        <span style={{ position: 'absolute', top: 16, right: 16, padding: '5px 11px', background: 'rgba(21,18,11,0.62)', backdropFilter: 'blur(4px)', color: 'var(--gold-soft)', fontSize: '0.62rem', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+        <span style={{ position: 'absolute', top: 14, left: 14, padding: '6px 12px', background: 'rgba(27,23,16,0.68)', backdropFilter: 'blur(5px)', color: 'var(--gold-soft)', fontSize: '0.62rem', fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', borderRadius: 999 }}>
           {CATEGORY_LABEL[studio.category]}
         </span>
       </div>
 
-      <div style={{ padding: '24px 24px 26px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <h3 className="font-display" style={{ fontSize: '1.65rem', fontWeight: 500, color: 'var(--noir)', lineHeight: 1.1, margin: 0, letterSpacing: '-0.01em' }}>
-          {studio.name}
-        </h3>
+      <div style={{ padding: '22px 22px 24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
+          <h3 className="font-display" style={{ fontSize: '1.5rem', fontWeight: 500, color: 'var(--noir)', lineHeight: 1.12, margin: 0, letterSpacing: '-0.01em' }}>
+            {studio.name}
+          </h3>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--muted)', fontSize: '0.78rem', flexShrink: 0 }}>
+            <Users size={13} /> {studio.maxGuests}
+          </span>
+        </div>
         <p style={{ marginTop: 8, fontSize: '0.9rem', color: 'var(--ink-soft)', lineHeight: 1.6, flex: 1 }}>
           {studio.shortDescription}
         </p>
 
-        <div style={{ marginTop: 22, paddingTop: 18, borderTop: '1px solid var(--line)', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+        <div style={{ marginTop: 20, paddingTop: 18, borderTop: '1px solid var(--line)', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontSize: '0.66rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 3 }}>À partir de</div>
-            <div className="font-display" style={{ fontSize: '1.7rem', fontWeight: 500, color: 'var(--gold-deep)', lineHeight: 1 }}>
+            <div style={{ fontSize: '0.64rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 4 }}>À partir de</div>
+            <div className="price-tag" style={{ fontSize: '1.6rem' }}>
               {formatXOF(studio.pricePerDay)}
-              <span style={{ fontSize: '0.8rem', color: 'var(--muted)', fontFamily: 'var(--font-body)' }}> /24h</span>
+              <span style={{ fontSize: '0.8rem', color: 'var(--muted)', fontFamily: 'var(--font-body)', fontWeight: 500 }}> / nuit</span>
             </div>
           </div>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--muted)', fontSize: '0.78rem' }}>
-              <Users size={13} /> {studio.maxGuests}
-            </span>
-            <span style={{ width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--gold-deep)', color: 'var(--gold-deep)' }}>
-              <ArrowRight size={15} />
-            </span>
+          <span style={{ width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 999, background: 'var(--gold-wash)', border: '1px solid var(--gold-deep)', color: 'var(--gold-deep)' }}>
+            <ArrowRight size={16} />
           </span>
         </div>
       </div>

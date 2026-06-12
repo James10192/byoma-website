@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from 'convex/react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { api } from '../../../convex/_generated/api'
@@ -30,18 +30,27 @@ function eachDay(start: string, end: string, cb: (s: string) => void) {
 export function BookingCalendar({
   studioId,
   onSelect,
+  initialRange,
 }: {
   studioId: Id<'studios'>
   onSelect: (range: DateRange) => void
+  initialRange?: DateRange
 }) {
   const data = useQuery(api.reservations.getBookedDates, { studioId })
 
   const now = new Date()
   const todayStr = iso(now.getFullYear(), now.getMonth(), now.getDate())
-  const [view, setView] = useState({ y: now.getFullYear(), m: now.getMonth() })
-  const [start, setStart] = useState<string | null>(null)
-  const [end, setEnd] = useState<string | null>(null)
+  const initBase = initialRange ? new Date(initialRange.checkIn + 'T00:00:00') : now
+  const [view, setView] = useState({ y: initBase.getFullYear(), m: initBase.getMonth() })
+  const [start, setStart] = useState<string | null>(initialRange?.checkIn ?? null)
+  const [end, setEnd] = useState<string | null>(initialRange?.checkOut ?? null)
   const [hover, setHover] = useState<string | null>(null)
+
+  // Propage une fois la plage initiale (dates choisies depuis la barre de réservation du hero).
+  useEffect(() => {
+    if (initialRange) onSelect(initialRange)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Ensemble des jours indisponibles (réservations + périodes bloquées).
   const unavailable = useMemo(() => {
@@ -118,7 +127,7 @@ export function BookingCalendar({
         <button type="button" onClick={() => move(-1)} disabled={atMinMonth} aria-label="Mois précédent" style={navBtn(atMinMonth)}>
           <ChevronLeft size={18} />
         </button>
-        <span className="font-display" style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--dark)' }}>
+        <span className="font-display" style={{ fontSize: '1.2rem', fontWeight: 500, letterSpacing: '-0.01em', color: 'var(--noir)' }}>
           {MONTHS[view.m]} {view.y}
         </span>
         <button type="button" onClick={() => move(1)} aria-label="Mois suivant" style={navBtn(false)}>
@@ -173,16 +182,16 @@ export function BookingCalendar({
         <button
           type="button"
           onClick={reset}
-          style={{ marginTop: 14, background: 'none', border: 'none', color: 'var(--gold-dark)', fontSize: '0.8125rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3 }}
+          style={{ marginTop: 14, background: 'none', border: 'none', color: 'var(--gold-deep)', fontSize: '0.8125rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3 }}
         >
           Réinitialiser les dates
         </button>
       )}
 
-      <div style={{ marginTop: 16, display: 'flex', gap: 18, flexWrap: 'wrap', fontSize: '0.75rem', color: 'var(--muted-2)' }}>
-        <Legend swatch="var(--gold)" label="Sélection" />
-        <Legend swatch="#F5F0E8" label="Indisponible" border />
-        <Legend swatch="var(--surface)" label="Disponible" border />
+      <div style={{ marginTop: 16, display: 'flex', gap: 18, flexWrap: 'wrap', fontSize: '0.75rem', color: 'var(--ink-soft)' }}>
+        <Legend swatch="var(--noir)" label="Sélection" />
+        <Legend swatch="var(--gold-wash)" label="Indisponible" border />
+        <Legend swatch="var(--paper)" label="Disponible" border />
       </div>
     </div>
   )
@@ -190,16 +199,17 @@ export function BookingCalendar({
 
 function navBtn(disabled: boolean): React.CSSProperties {
   return {
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'var(--surface)',
+    background: 'var(--paper)',
     border: '1px solid var(--line)',
-    borderRadius: 2,
-    color: disabled ? 'var(--line)' : 'var(--dark-2)',
+    borderRadius: '50%',
+    color: disabled ? 'var(--line)' : 'var(--ink-soft)',
     cursor: disabled ? 'not-allowed' : 'pointer',
+    transition: 'border-color 0.2s var(--ease), color 0.2s var(--ease)',
   }
 }
 
