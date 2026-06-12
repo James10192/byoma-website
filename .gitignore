@@ -1,0 +1,13 @@
+node_modules
+dist
+.output
+.vercel
+.env
+.env.local
+*.env
+convex/_generated
+
+.vercel
+
+# Notes de dev internes (non publiees)
+HANDOFF.md
