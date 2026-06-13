@@ -1,18 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { handler } from '~/lib/auth/auth-server'
 
+// Relai des requêtes Better Auth vers Convex via le handler officiel
+// (@convex-dev/better-auth/react-start). Gère cookies, CORS et endpoint token.
 export const Route = createFileRoute('/api/auth/$')({
   server: {
     handlers: {
-      GET: ({ request }: { request: Request }) => {
-        const convexSiteUrl = process.env.VITE_CONVEX_SITE_URL ?? process.env.CONVEX_SITE_URL ?? ''
-        const url = request.url.replace(new URL(request.url).origin, convexSiteUrl)
-        return fetch(url, { method: 'GET', headers: request.headers })
-      },
-      POST: async ({ request }: { request: Request }) => {
-        const convexSiteUrl = process.env.VITE_CONVEX_SITE_URL ?? process.env.CONVEX_SITE_URL ?? ''
-        const url = request.url.replace(new URL(request.url).origin, convexSiteUrl)
-        return fetch(url, { method: 'POST', headers: request.headers, body: request.body })
-      },
+      GET: ({ request }: { request: Request }) => handler(request),
+      POST: ({ request }: { request: Request }) => handler(request),
     },
   },
 })

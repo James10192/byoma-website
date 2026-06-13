@@ -1,17 +1,11 @@
 import { createAuthClient } from 'better-auth/react'
 import { convexClient } from '@convex-dev/better-auth/client/plugins'
 
-const convexSiteUrl =
-  (import.meta.env.VITE_CONVEX_SITE_URL as string | undefined) ?? 'http://localhost:9999'
-
+// Pattern officiel : baseURL same-origin par défaut (/api/auth), proxié vers
+// Convex par le handler react-start. Pas de customFetchImpl manuel (celui-ci
+// renvoyait l'endpoint token Convex en cross-origin -> "Failed to fetch" au
+// signup/autoSignIn). convexClient() gère l'échange de token via le proxy.
 export const authClient = createAuthClient({
-  baseURL: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000',
-  fetchOptions: {
-    customFetchImpl: async (url, init) => {
-      const proxyUrl = url.toString().replace(convexSiteUrl, '')
-      return fetch(proxyUrl, init)
-    },
-  },
   plugins: [convexClient()],
 })
 
