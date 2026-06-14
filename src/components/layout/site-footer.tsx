@@ -67,9 +67,15 @@ export function SiteFooter() {
               <ul>
                 {LINKS.map((l) => (
                   <li key={l.href}>
-                    <a href={l.href} className="footer-link">
-                      <span>{l.label}</span>
-                    </a>
+                    {l.href.includes('#') ? (
+                      <a href={l.href} className="footer-link">
+                        <span>{l.label}</span>
+                      </a>
+                    ) : (
+                      <Link to={l.href} className="footer-link">
+                        <span>{l.label}</span>
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

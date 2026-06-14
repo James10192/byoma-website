@@ -50,16 +50,20 @@ export function SiteHeader() {
           </Link>
 
           <nav className="nav-links" aria-label="Navigation principale">
-            {navLinks.map((l) => (
-              <a key={l.href} href={l.href} className="nav-link">{l.label}</a>
-            ))}
+            {navLinks.map((l) =>
+              l.href.includes('#') ? (
+                <a key={l.href} href={l.href} className="nav-link">{l.label}</a>
+              ) : (
+                <Link key={l.href} to={l.href} className="nav-link">{l.label}</Link>
+              ),
+            )}
           </nav>
 
           <div className="nav-actions">
             <a href="tel:+2250700255295" className="nav-phone" aria-label="Appeler les Résidences BYOMA">
               <Phone size={15} /> 07 00 25 52 95
             </a>
-            <a href="/studios" className="nav-cta">Réserver <ArrowRight size={15} /></a>
+            <Link to="/studios" className="nav-cta">Réserver <ArrowRight size={15} /></Link>
             <button onClick={() => setOpen(!open)} className="nav-burger" aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'} aria-expanded={open}>
               {open ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -71,15 +75,22 @@ export function SiteHeader() {
       {/* Menu plein écran (mobile) — hors du header (qui a un transform) */}
       <div className={`nav-sheet ${open ? 'open' : ''}`} aria-hidden={!open}>
         <nav className="nav-sheet-links">
-          {navLinks.map((l, i) => (
-            <a key={l.href} href={l.href} className="nav-sheet-link" style={{ transitionDelay: open ? `${0.06 + i * 0.05}s` : '0s' }}>
-              <span>{l.label}</span>
-              <ArrowRight size={18} />
-            </a>
-          ))}
+          {navLinks.map((l, i) =>
+            l.href.includes('#') ? (
+              <a key={l.href} href={l.href} className="nav-sheet-link" style={{ transitionDelay: open ? `${0.06 + i * 0.05}s` : '0s' }}>
+                <span>{l.label}</span>
+                <ArrowRight size={18} />
+              </a>
+            ) : (
+              <Link key={l.href} to={l.href} className="nav-sheet-link" style={{ transitionDelay: open ? `${0.06 + i * 0.05}s` : '0s' }}>
+                <span>{l.label}</span>
+                <ArrowRight size={18} />
+              </Link>
+            ),
+          )}
         </nav>
         <div className="nav-sheet-foot">
-          <a href="/studios" className="btn btn-primary" style={{ width: '100%' }}>Réserver un séjour <ArrowRight size={16} /></a>
+          <Link to="/studios" className="btn btn-primary" style={{ width: '100%' }}>Réserver un séjour <ArrowRight size={16} /></Link>
           <div className="nav-sheet-contact">
             <a href="tel:+2250700255295"><Phone size={15} /> 07 00 25 52 95</a>
             <a href="https://wa.me/2250700255295" target="_blank" rel="noopener noreferrer">WhatsApp</a>
